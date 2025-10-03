@@ -1,0 +1,34 @@
+VictorLight James Ugbede - Full Stack Developer
+
+Contact Information:
+Email: victor.onyemaechi@example.com
+Phone: +234 xxx xxx xxxx
+Location: Nigeria
+LinkedIn: linkedin.com/in/victor-onyemaechi
+GitHub: github.com/victor-onyemaechi
+
+Professional Summary:
+Passionate Full Stack Developer with expertise in web development, desktop applications, and Arduino/IoT projects. Experienced in building scalable solutions using modern technologies including React, Node.js, TypeScript, and Python.
+
+Technical Skills:
+• Frontend: React, Next.js, TypeScript, JavaScript, HTML5, CSS3, Tailwind CSS
+• Backend: Node.js, Python, Express.js, REST APIs, GraphQL
+• Databases: PostgreSQL, MongoDB, SQLite
+• Desktop Development: Electron, Python Tkinter, C#/.NET
+• Arduino/IoT: Arduino IDE, ESP32, C/C++, Raspberry Pi
+• Tools: Git, Docker, VS Code, Linux, AWS, Firebase
+
+Professional Experience:
+[Add your actual work experience here]
+
+Education:
+[Add your educational background here]
+
+Projects:
+• E-Commerce Platform - Full-stack web application with React and Node.js
+• Smart Home Controller - ESP32-based IoT system with web dashboard
+• File Organizer Pro - Desktop automation tool with Python
+• Weather Station - Multi-sensor Arduino project with data logging
+
+Certifications:
+[Add any relevant certifications here]

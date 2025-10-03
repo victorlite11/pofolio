@@ -1,0 +1,298 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* VS Code Portfolio Design System */
+
+@layer base {
+  :root {
+    /* VS Code Dark Theme Colors */
+    --vs-background: 212 19% 8%;
+    --vs-sidebar: 212 19% 6%;
+    --vs-border: 212 19% 12%;
+    --vs-text: 0 0% 90%;
+    --vs-text-muted: 0 0% 70%;
+    --vs-text-dim: 0 0% 50%;
+    --vs-accent: 207 100% 62%;
+    --vs-accent-hover: 207 100% 67%;
+    --vs-success: 120 100% 40%;
+    --vs-warning: 45 100% 50%;
+    --vs-error: 0 100% 50%;
+    --vs-purple: 270 100% 70%;
+    --vs-orange: 25 100% 60%;
+    --vs-blue: 207 100% 62%;
+    --vs-green: 120 100% 40%;
+    --vs-yellow: 45 100% 50%;
+    --vs-red: 0 100% 50%;
+    
+    /* Syntax highlighting */
+    --syntax-keyword: 197 100% 60%;
+    --syntax-string: 120 100% 60%;
+    --syntax-number: 30 100% 60%;
+    --syntax-comment: 0 0% 50%;
+    --syntax-function: 60 100% 70%;
+    --syntax-variable: 280 100% 70%;
+    
+    /* Layout */
+    --background: var(--vs-background);
+    --foreground: var(--vs-text);
+    --card: var(--vs-background);
+    --card-foreground: var(--vs-text);
+    --popover: var(--vs-background);
+    --popover-foreground: var(--vs-text);
+    --primary: var(--vs-accent);
+    --primary-foreground: 0 0% 100%;
+    --secondary: var(--vs-border);
+    --secondary-foreground: var(--vs-text);
+    --muted: var(--vs-border);
+    --muted-foreground: var(--vs-text-muted);
+    --accent: var(--vs-accent);
+    --accent-foreground: 0 0% 100%;
+    --destructive: var(--vs-error);
+    --destructive-foreground: 0 0% 100%;
+    --border: var(--vs-border);
+    --input: var(--vs-border);
+    --ring: var(--vs-accent);
+    --radius: 0.25rem;
+    
+    /* Sidebar specific */
+    --sidebar-background: var(--vs-sidebar);
+    --sidebar-foreground: var(--vs-text);
+    --sidebar-primary: var(--vs-accent);
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: var(--vs-border);
+    --sidebar-accent-foreground: var(--vs-text);
+    --sidebar-border: var(--vs-border);
+    --sidebar-ring: var(--vs-accent);
+    
+    /* Custom gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(var(--vs-accent)), hsl(var(--vs-purple)));
+    --gradient-code: linear-gradient(90deg, hsl(var(--vs-background)), hsl(var(--vs-sidebar)));
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s ease-out;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-mono;
+    font-family: 'Fira Code', 'Inter', monospace;
+  }
+  
+  .font-code {
+    font-family: 'Fira Code', monospace;
+  }
+  
+  .font-sans {
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer components {
+  /* VS Code specific styles */
+  .vs-code-theme {
+    @apply bg-background text-foreground;
+  }
+  
+  .file-explorer {
+    @apply bg-sidebar text-sidebar-foreground border-r border-sidebar-border;
+  }
+  
+  .syntax-keyword {
+    color: hsl(var(--syntax-keyword));
+  }
+  
+  .syntax-string {
+    color: hsl(var(--syntax-string));
+  }
+  
+  .syntax-number {
+    color: hsl(var(--syntax-number));
+  }
+  
+  .syntax-comment {
+    color: hsl(var(--syntax-comment));
+  }
+  
+  .syntax-function {
+    color: hsl(var(--syntax-function));
+  }
+  
+  .syntax-variable {
+    color: hsl(var(--syntax-variable));
+  }
+  
+  /* Typewriter animation */
+  .typewriter {
+    overflow: hidden;
+    border-right: 2px solid hsl(var(--vs-accent));
+    white-space: nowrap;
+    margin: 0 auto;
+    animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+  }
+  
+  @keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+  
+  @keyframes blink-caret {
+    from, to { border-color: transparent; }
+    50% { border-color: hsl(var(--vs-accent)); }
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  
+  @keyframes glow {
+    0%, 100% {
+      box-shadow: 0 0 20px hsl(var(--vs-accent) / 0.3);
+    }
+    50% {
+      box-shadow: 0 0 30px hsl(var(--vs-accent) / 0.6);
+    }
+  }
+  
+  /* Hover effects */
+  .file-item {
+    @apply transition-colors duration-200 hover:bg-sidebar-accent cursor-pointer rounded px-2 py-1;
+  }
+  
+  .file-item.active {
+    @apply bg-sidebar-accent text-sidebar-accent-foreground;
+  }
+  
+  .project-card {
+    @apply transition-all duration-300 hover:scale-105 hover:shadow-lg cursor-pointer;
+    @apply bg-card border border-border rounded-lg p-4;
+  }
+
+  /* Featured ribbon */
+  .ribbon {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    background: linear-gradient(90deg, hsl(var(--vs-accent)), hsl(var(--vs-purple)));
+    color: white;
+    padding: 6px 10px;
+    font-weight: 600;
+    border-radius: 9999px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    z-index: 10;
+    font-size: 0.75rem;
+  }
+
+  .favorite-button {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background: rgba(0,0,0,0.45);
+    color: #fff;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: transform 0.15s ease, background 0.2s ease;
+    z-index: 11;
+  }
+
+  .favorite-button:hover { transform: scale(1.06); }
+  .favorite-button.fav { background: linear-gradient(90deg, #ffd166, #ffb703); color: #000; }
+  
+  .profile-image {
+    animation: glow 3s ease-in-out infinite;
+  }
+  
+  .fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+  
+  .float-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .modal-backdrop {
+    @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-50;
+  }
+  
+  /* Gradient text effect */
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--vs-accent)), hsl(var(--vs-purple)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+/* Client (light) theme overrides */
+.client-theme {
+  --primary-color: 37 99% 59%; /* #2563eb */
+  --secondary-color: 30 64% 40%; /* #1e40af */
+  --text-color: 210 14% 12%; /* dark text */
+  --light-text: 220 12% 58%;
+  --background-light: 210 98% 98%; /* very light */
+  --card-bg-light: 0 0% 100%;
+}
+
+.client-theme body {
+  background: hsl(var(--background-light));
+  color: hsl(var(--text-color));
+  font-family: 'Inter', sans-serif;
+}
+
+.client-theme .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+
+.client-theme .section-title { font-size: 2.5rem; font-weight: 700; text-align: center; margin-bottom: 1.5rem; position: relative; }
+.client-theme .section-title::after { content: ''; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); width: 80px; height: 4px; background: hsl(var(--primary-color)); border-radius: 2px; }
+
+.client-theme .btn { display: inline-block; padding: 0.6rem 1.25rem; background: hsl(var(--primary-color)); color: white; border-radius: 6px; transition: var(--transition-smooth); }
+.client-theme .btn:hover { background: hsl(var(--secondary-color)); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+
+.client-theme .hero { padding-top: 3.5rem; }
+.client-theme .hero .text-muted-foreground { color: hsl(var(--light-text)); }
+
+.client-theme .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 1.5rem; }
+.client-theme .project-card { background: hsl(var(--card-bg-light)); border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(16,24,40,0.06); transition: var(--transition-smooth); }
+.client-theme .project-card:hover { transform: translateY(-8px); box-shadow: 0 18px 40px rgba(16,24,40,0.08); }
+.client-theme .project-img { height: 200px; display:flex; align-items:center; justify-content:center; background: linear-gradient(45deg, #3b82f6, #6366f1); color: white; font-size: 2.5rem; }
+.client-theme .project-info { padding: 1rem 1.25rem; }
+.client-theme .skill { display:inline-block; background: hsl(var(--card-bg-light)); padding: 0.35rem 0.6rem; border-radius: 9999px; font-size: 0.8rem; box-shadow: 0 6px 18px rgba(16,24,40,0.04); }
+
+.client-theme .contact-content { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+.client-theme .contact-item { display:flex; gap:1rem; align-items:center; }
+.client-theme .contact-icon { width:48px; height:48px; border-radius:9999px; display:flex; align-items:center; justify-content:center; background: hsl(var(--primary-color)); color: white; }
+
+/* ThemePanel tweaks */
+.modal-backdrop .bg-card {
+  background: hsl(var(--card-bg-light));
+}
+.modal-backdrop input[type="color"] { width: 64px; height: 40px; padding: 0; border: none; background: transparent; }
+

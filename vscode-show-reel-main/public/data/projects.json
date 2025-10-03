@@ -1,0 +1,48 @@
+[
+  {
+    "id": "1",
+    "name": "E-Commerce Platform",
+    "description": "Full-stack online store with payment integration",
+    "category": "website",
+    "technologies": ["React", "Node.js", "PostgreSQL", "Stripe"],
+    "codeSnippet": "// Product component example\nfunction Product() { /* ... */ }",
+  "image": "/lovable-uploads/victorlight.jpeg",
+    "liveUrl": "https://example.com/ecommerce",
+    "repoUrl": "https://github.com/example/ecommerce"
+  },
+  {
+    "id": "2",
+    "name": "Social Media Dashboard",
+    "description": "Analytics dashboard for social media management",
+    "category": "website",
+    "technologies": ["Next.js", "TypeScript", "Chart.js", "MongoDB"],
+    "codeSnippet": "// Analytics hook example\nfunction useAnalytics() { /* ... */ }",
+    "image": "/placeholder.svg",
+    "liveUrl": "https://example.com/dashboard",
+    "repoUrl": "https://github.com/example/dashboard"
+  },
+  {
+    "id": "3",
+    "name": "Task Manager Desktop App",
+    "description": "Cross-platform productivity tool built with Electron",
+    "category": "software",
+    "technologies": ["Electron", "React", "SQLite"],
+    "codeSnippet": "// Desktop app main\nconst { app } = require('electron');"
+  },
+  {
+    "id": "4",
+    "name": "Smart Home Controller",
+    "description": "Arduino-based IoT system for home automation",
+    "category": "arduino",
+    "technologies": ["Arduino", "ESP32", "MQTT"],
+    "codeSnippet": "// Arduino loop example\nvoid loop() { /* ... */ }"
+  },
+  {
+    "id": "5",
+    "name": "Weather Station",
+    "description": "ESP32-powered environmental monitoring device",
+    "category": "arduino",
+    "technologies": ["ESP32", "Sensors", "MQTT"],
+    "codeSnippet": "// Read sensor data\nreadSensor();"
+  }
+]
