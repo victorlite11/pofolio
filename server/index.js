@@ -125,13 +125,8 @@ app.post('/api/contact', (req, res) => {
       console.error('Upload error', err);
       return res.status(400).json({ error: err.message || 'Upload failed' });
     }
-
-    // Support both JSON body (no file) and multipart/form-data (with file)
     const body = req.body || {};
-    const name = body.name;
-    const email = body.email;
-    const senderType = body.senderType || 'individual';
-    const companyName = body.companyName || '';
+    const { name, email, senderType = 'individual', companyName } = body;
     const position = body.position || '';
     const message = body.message || '';
 
