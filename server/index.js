@@ -21,9 +21,11 @@ function createTransport(options) {
 // Build primary transporter from env with configurable timeouts
 const SMTP_TIMEOUT_MS = Number(process.env.SMTP_TIMEOUT_MS || 120000); // default 120s for Render
 function buildSmtpOptions(override = {}) {
+  // Prefer STARTTLS (port 587) by default in cloud environments like Render
   return {
     host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 465),
+    port: Number(process.env.SMTP_PORT || 587),
+    // If SMTP_SECURE is explicitly set to 'true' we'll use SMTPS (465); otherwise prefer STARTTLS
     secure: process.env.SMTP_SECURE === 'true',
     auth: {
       user: process.env.SMTP_USER,
@@ -66,9 +68,9 @@ async function verifyWithFallback() {
   const primaryOk = await attemptVerify(buildSmtpOptions(), 'primary');
   if (primaryOk) return;
 
-  console.log('Primary transporter verify failed. Attempting fallback to port 587 (STARTTLS)... (fallback to 587 is automatic)');
-  const fallbackOpts = buildSmtpOptions({ port: 587, secure: false });
-  const fallbackOk = await attemptVerify(fallbackOpts, 'fallback 587');
+  console.log('Primary transporter verify failed. Attempting fallback to port 465 (SMTPS)...');
+  const fallbackOpts = buildSmtpOptions({ port: 465, secure: true });
+  const fallbackOk = await attemptVerify(fallbackOpts, 'fallback 465');
   if (!fallbackOk) {
     console.error('Both primary and fallback transporter.verify failed: see earlier logs for details');
   }
