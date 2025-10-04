@@ -174,15 +174,27 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, time: new Date().toISOString() });
 });
 
-// If a frontend build exists at ./dist (repo root), serve it as static files so the same service can host both
-const distPath = path.join(process.cwd(), 'dist');
-// Log whether the dist folder exists and show a small listing to aid debugging on Render
-console.log('Resolved distPath ->', distPath);
-console.log('dist exists?', fs.existsSync(distPath));
-if (fs.existsSync(distPath)) {
+// Try several likely locations for a built frontend (depending on Render's working directory)
+const candidates = [
+  path.join(process.cwd(), 'dist'), // when running from repo root
+  path.join(process.cwd(), '..', 'dist'), // when running from server/ (repo root is parent)
+  path.join(process.cwd(), 'server', 'dist'), // in case build placed dist under server/
+];
+
+console.log('process.cwd() ->', process.cwd());
+let distPath = null;
+for (const c of candidates) {
+  console.log('Checking for dist at', c, 'exists?', fs.existsSync(c));
+  if (fs.existsSync(c)) {
+    distPath = c;
+    break;
+  }
+}
+
+if (distPath) {
   try {
     const files = fs.readdirSync(distPath).slice(0, 20);
-    console.log('dist contents (first 20):', files);
+    console.log('Found dist at', distPath, 'contents (first 20):', files);
   } catch (e) {
     console.warn('Failed to read dist contents:', e && e.message);
   }
@@ -190,10 +202,11 @@ if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
   // Fallback to index.html for SPA routing
   app.get('*', (req, res, next) => {
-    // Only handle GET requests that are not API routes
     if (req.method !== 'GET' || req.path.startsWith('/api/')) return next();
     res.sendFile(path.join(distPath, 'index.html'));
   });
+} else {
+  console.log('No dist folder found in any candidate location; root requests will 404 until dist is produced.');
 }
 
 const port = process.env.PORT || 4000;
