@@ -176,7 +176,16 @@ app.get('/api/health', (req, res) => {
 
 // If a frontend build exists at ./dist (repo root), serve it as static files so the same service can host both
 const distPath = path.join(process.cwd(), 'dist');
+// Log whether the dist folder exists and show a small listing to aid debugging on Render
+console.log('Resolved distPath ->', distPath);
+console.log('dist exists?', fs.existsSync(distPath));
 if (fs.existsSync(distPath)) {
+  try {
+    const files = fs.readdirSync(distPath).slice(0, 20);
+    console.log('dist contents (first 20):', files);
+  } catch (e) {
+    console.warn('Failed to read dist contents:', e && e.message);
+  }
   console.log('Serving static frontend from', distPath);
   app.use(express.static(distPath));
   // Fallback to index.html for SPA routing
