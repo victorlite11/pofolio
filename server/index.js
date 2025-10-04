@@ -174,8 +174,8 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, time: new Date().toISOString() });
 });
 
-// If a frontend build exists at ../dist, serve it as static files so the same service can host both
-const distPath = path.join(process.cwd(), '..', 'dist');
+// If a frontend build exists at ./dist (repo root), serve it as static files so the same service can host both
+const distPath = path.join(process.cwd(), 'dist');
 if (fs.existsSync(distPath)) {
   console.log('Serving static frontend from', distPath);
   app.use(express.static(distPath));
