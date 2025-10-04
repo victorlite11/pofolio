@@ -5,6 +5,7 @@ import nodemailer from 'nodemailer';
 import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
+import dns from 'dns/promises';
 
 // Load environment variables from server/.env (server runs from project root)
 dotenv.config({ path: './server/.env' });
@@ -50,6 +51,13 @@ async function verifyWithFallback() {
     const maxAttempts = 2;
     for (let i = 1; i <= maxAttempts; i++) {
       try {
+        console.log(`Verifying transporter (${label}) host=${opts.host} port=${opts.port} secure=${opts.secure}`);
+        try {
+          const resolved = await dns.lookup(opts.host, { all: true });
+          console.log(`Resolved ${opts.host} ->`, resolved.map((r) => r.address).slice(0, 4));
+        } catch (e) {
+          console.warn('DNS lookup failed for', opts.host, e && e.message);
+        }
         transporter = createTransport(opts);
         await transporter.verify();
         console.log(`transporter ready (${label})`);
@@ -169,8 +177,9 @@ app.post('/api/contact', (req, res) => {
         const maxAttempts = Number(process.env.SMTP_MAX_ATTEMPTS || 3);
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
           try {
+            console.log(`Attempting send via SMTP host=${transporter.options && transporter.options.host} port=${transporter.options && transporter.options.port}`);
             const info = await transporter.sendMail(mailOpts);
-            console.log('Message sent: %s', info.messageId);
+            console.log('Message sent: %s', info.messageId || (info && info.response));
             return info;
           } catch (err) {
             console.warn(`sendMail attempt ${attempt} failed:`, err && err.message);
@@ -201,6 +210,24 @@ app.post('/api/contact', (req, res) => {
 // Health check endpoint for Render and monitoring
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, time: new Date().toISOString() });
+});
+
+// Transport health endpoint: runs transporter.verify() and returns result
+app.get('/api/transport-status', async (req, res) => {
+  try {
+    const opts = transporter && transporter.options ? transporter.options : buildSmtpOptions();
+    try {
+      const resolved = await dns.lookup(opts.host, { all: true });
+      console.log('Transport-status DNS:', resolved.map((r) => r.address).slice(0, 4));
+    } catch (e) {
+      console.warn('Transport-status DNS lookup failed for', opts.host);
+    }
+    await transporter.verify();
+    return res.json({ ok: true, host: opts.host, port: opts.port, secure: opts.secure });
+  } catch (err) {
+    console.error('transport-status verify failed', err && err.message);
+    return res.status(503).json({ ok: false, error: err && err.message });
+  }
 });
 
 // Try several likely locations for a built frontend (depending on Render's working directory)
