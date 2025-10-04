@@ -19,17 +19,27 @@ function createTransport(options) {
   return nodemailer.createTransport(options);
 }
 
-// Build primary transporter from env
-let transporter = createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT || 465),
-  secure: process.env.SMTP_SECURE === 'true',
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-  logger: true,
-});
+// Build primary transporter from env with configurable timeouts
+const SMTP_TIMEOUT_MS = Number(process.env.SMTP_TIMEOUT_MS || 60000); // default 60s
+function buildSmtpOptions(override = {}) {
+  return {
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT || 465),
+    secure: process.env.SMTP_SECURE === 'true',
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+    logger: true,
+    connectionTimeout: SMTP_TIMEOUT_MS,
+    greetingTimeout: SMTP_TIMEOUT_MS,
+    socketTimeout: SMTP_TIMEOUT_MS,
+    ...override,
+  };
+}
+
+// Create transporter instance (may be re-assigned during fallback)
+let transporter = createTransport(buildSmtpOptions());
 
 // Configure SendGrid if API key is provided
 if (process.env.SENDGRID_API_KEY) {
@@ -39,31 +49,34 @@ if (process.env.SENDGRID_API_KEY) {
 
 // If initial verify fails and port 465 was used, try 587 (STARTTLS) as a fallback
 async function verifyWithFallback() {
-  try {
-    await transporter.verify();
-    console.log('transporter ready (primary)');
-    return;
-  } catch (err) {
-    console.warn('Primary transporter verify failed:', err && err.message);
-    // Try fallback (587, secure=false -> use STARTTLS)
-    const fallbackOpts = {
-      host: process.env.SMTP_HOST,
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-      logger: true,
-    };
-    console.log('Attempting fallback to port 587 (STARTTLS)...');
-    transporter = createTransport(fallbackOpts);
-    try {
-      await transporter.verify();
-      console.log('transporter ready (fallback 587)');
-    } catch (err2) {
-      console.error('Both primary and fallback transporter.verify failed:', err2 && err2.message);
+  // Try primary then fallback with a small retry/backoff
+  const attemptVerify = async (opts, label) => {
+    const maxAttempts = 2;
+    for (let i = 1; i <= maxAttempts; i++) {
+      try {
+        transporter = createTransport(opts);
+        await transporter.verify();
+        console.log(`transporter ready (${label})`);
+        return true;
+      } catch (err) {
+        console.warn(`${label} transporter verify attempt ${i} failed:`, err && err.message);
+        if (i < maxAttempts) {
+          // backoff
+          await new Promise((r) => setTimeout(r, 1000 * i));
+        }
+      }
     }
+    return false;
+  };
+
+  const primaryOk = await attemptVerify(buildSmtpOptions(), 'primary');
+  if (primaryOk) return;
+
+  console.log('Primary transporter verify failed. Attempting fallback to port 587 (STARTTLS)...');
+  const fallbackOpts = buildSmtpOptions({ port: 587, secure: false });
+  const fallbackOk = await attemptVerify(fallbackOpts, 'fallback 587');
+  if (!fallbackOk) {
+    console.error('Both primary and fallback transporter.verify failed: see earlier logs for details');
   }
 }
 
@@ -188,8 +201,27 @@ app.post('/api/contact', (req, res) => {
         const resp = await sgMail.send(sgMsg);
         console.log('SendGrid response', resp && resp[0] && resp[0].statusCode);
       } else {
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Message sent: %s', info.messageId);
+        // send with Nodemailer but with retry/backoff
+        const sendWithRetries = async (mailOpts) => {
+          const maxAttempts = Number(process.env.SMTP_MAX_ATTEMPTS || 3);
+          for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+              const info = await transporter.sendMail(mailOpts);
+              console.log('Message sent: %s', info.messageId);
+              return info;
+            } catch (err) {
+              console.warn(`sendMail attempt ${attempt} failed:`, err && err.message);
+              if (attempt < maxAttempts) {
+                const backoff = 500 * Math.pow(2, attempt); // exponential backoff
+                await new Promise((r) => setTimeout(r, backoff));
+              } else {
+                throw err;
+              }
+            }
+          }
+        };
+        const info = await sendWithRetries(mailOptions);
+        // info already logged in sendWithRetries
       }
       // If file was uploaded, remove it after sending to keep uploads folder clean
       if (req.file) {
