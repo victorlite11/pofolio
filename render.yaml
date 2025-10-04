@@ -1,20 +1,13 @@
 services:
   - type: web
-    name: pofolio-frontend
-    env: static
-    buildCommand: "npm install && npm run build"
-    staticPublishPath: dist
-    branch: main
-    # Note: set the build and publish settings in Render dashboard if you prefer the UI
-
-  - type: web
-    name: pofolio-server
+    name: pofolio
     env: node
     plan: free
     branch: main
-    buildCommand: "npm install"
+    # Build script will build the frontend and install server deps
+    buildCommand: "bash ./render-build.sh"
     startCommand: "node server/index.js"
-    buildContext: server
+    # Root stays at repo root; render-build.sh will handle building the frontend into ./dist
     envVars:
       - key: PORT
         value: "4000"
@@ -33,4 +26,4 @@ services:
       - key: CONTACT_RECEIVER
         fromDatabase: false
 
-# You will need to set the SMTP_* env vars in the Render dashboard for the server service securely.
+# Note: set the SMTP_* env vars in the Render dashboard for the service securely.
