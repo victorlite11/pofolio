@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
-import sgMail from '@sendgrid/mail';
 import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
@@ -41,11 +40,6 @@ function buildSmtpOptions(override = {}) {
 // Create transporter instance (may be re-assigned during fallback)
 let transporter = createTransport(buildSmtpOptions());
 
-// Configure SendGrid if API key is provided
-if (process.env.SENDGRID_API_KEY) {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-  console.log('SendGrid configured via SENDGRID_API_KEY');
-}
 
 // If initial verify fails and port 465 was used, try 587 (STARTTLS) as a fallback
 async function verifyWithFallback() {
@@ -173,56 +167,26 @@ app.post('/api/contact', (req, res) => {
     }
 
     try {
-      // If SendGrid is available use it (avoids SMTP timeouts from some hosts)
-      if (process.env.SENDGRID_API_KEY) {
-        const sgMsg = {
-          to: mailOptions.to,
-          from: mailOptions.from,
-          subject: mailOptions.subject,
-          html: mailOptions.html,
-          replyTo: mailOptions.replyTo,
-          attachments: [],
-        };
-        if (mailOptions.attachments && mailOptions.attachments.length) {
-          for (const a of mailOptions.attachments) {
-            try {
-              const data = fs.readFileSync(a.path);
-              sgMsg.attachments.push({
-                content: data.toString('base64'),
-                filename: a.filename,
-                type: a.contentType || 'application/octet-stream',
-                disposition: 'attachment',
-              });
-            } catch (e) {
-              console.warn('Failed to read attachment for SendGrid', e && e.message);
+      // send with Nodemailer but with retry/backoff
+      const sendWithRetries = async (mailOpts) => {
+        const maxAttempts = Number(process.env.SMTP_MAX_ATTEMPTS || 3);
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          try {
+            const info = await transporter.sendMail(mailOpts);
+            console.log('Message sent: %s', info.messageId);
+            return info;
+          } catch (err) {
+            console.warn(`sendMail attempt ${attempt} failed:`, err && err.message);
+            if (attempt < maxAttempts) {
+              const backoff = 500 * Math.pow(2, attempt); // exponential backoff
+              await new Promise((r) => setTimeout(r, backoff));
+            } else {
+              throw err;
             }
           }
         }
-        const resp = await sgMail.send(sgMsg);
-        console.log('SendGrid response', resp && resp[0] && resp[0].statusCode);
-      } else {
-        // send with Nodemailer but with retry/backoff
-        const sendWithRetries = async (mailOpts) => {
-          const maxAttempts = Number(process.env.SMTP_MAX_ATTEMPTS || 3);
-          for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-            try {
-              const info = await transporter.sendMail(mailOpts);
-              console.log('Message sent: %s', info.messageId);
-              return info;
-            } catch (err) {
-              console.warn(`sendMail attempt ${attempt} failed:`, err && err.message);
-              if (attempt < maxAttempts) {
-                const backoff = 500 * Math.pow(2, attempt); // exponential backoff
-                await new Promise((r) => setTimeout(r, backoff));
-              } else {
-                throw err;
-              }
-            }
-          }
-        };
-        const info = await sendWithRetries(mailOptions);
-        // info already logged in sendWithRetries
-      }
+      };
+      const info = await sendWithRetries(mailOptions);
       // If file was uploaded, remove it after sending to keep uploads folder clean
       if (req.file) {
         fs.unlink(req.file.path, (err) => {
