@@ -12,6 +12,8 @@ import profilePhoto5 from "@/assets/profile-photo5.jpeg";
 import profilePhoto6 from "@/assets/profile-photo6.jpeg";
 import profilePhoto7 from "@/assets/profile-photo7.jpeg";
 import profilePhoto8 from "@/assets/profile-photo8.jpeg";
+import arduino1 from "@/assets/arduino1.jpeg";
+import arduino2 from "@/assets/arduino2.jpeg";
 
 interface HeroProps {
   currentView: 'client' | 'dev';
@@ -29,6 +31,8 @@ const profileImages = [
   profilePhoto6,
   profilePhoto7,
   profilePhoto8,
+  arduino1,
+  arduino2,
 ];
 
 export function Hero({ currentView }: HeroProps) {

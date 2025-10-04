@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Code2, Rocket, Users, Award, Download } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import profilePhoto from "@/assets/profile-photo.jpg";
@@ -9,14 +9,17 @@ interface AboutProps {
 }
 
 export function About({ currentView }: AboutProps) {
+  // numeric targets with optional suffix (e.g. '+') so we can animate smoothly
   const stats = [
-    { icon: Code2, label: "Projects Completed", value: "50+" },
-    { icon: Users, label: "Satisfied Clients", value: "25+" },
-    { icon: Award, label: "Years Experience", value: "5+" },
-    { icon: Rocket, label: "Technologies", value: "20+" },
+    { icon: Code2, label: "Projects Completed", value: 50, suffix: "+" },
+    { icon: Users, label: "Satisfied Clients", value: 25, suffix: "+" },
+    { icon: Award, label: "Years Experience", value: 5, suffix: "+" },
+    { icon: Rocket, label: "Technologies", value: 20, suffix: "+" },
   ];
 
   const [cvReady, setCvReady] = useState(false);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const visible = useVisibility(sectionRef);
 
   useEffect(() => {
     if (!cvReady) return;
@@ -65,6 +68,51 @@ export function About({ currentView }: AboutProps) {
 
   const DOWNLOAD_TRIGGER_LINE = 24;
 
+  // small animated counter using requestAnimationFrame for smooth, performant increments
+  // tuned for a slower, smooth ease-out count; animation will only start when `start` is true
+  function AnimatedCounter({ target, suffix = "", duration = 2000, start = true }: { target: number; suffix?: string; duration?: number; start?: boolean }) {
+    const [count, setCount] = useState(0);
+
+    useEffect(() => {
+      // do not start animation until asked
+      if (!start) {
+        setCount(0);
+        return;
+      }
+
+      let raf = 0;
+      let startTime: number | null = null;
+
+      const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
+      const step = (timestamp: number) => {
+        if (startTime === null) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+        const rawProgress = Math.min(elapsed / duration, 1);
+        const eased = easeOutCubic(rawProgress);
+        const current = Math.floor(eased * target);
+        setCount(current);
+        if (rawProgress < 1) {
+          raf = requestAnimationFrame(step);
+        } else {
+          // ensure final exact value
+          setCount(target);
+        }
+      };
+
+      raf = requestAnimationFrame(step);
+
+      return () => cancelAnimationFrame(raf);
+    }, [target, duration]);
+
+    return (
+      <div aria-live="polite" className="text-2xl font-bold">
+        {count}
+        {suffix}
+      </div>
+    );
+  }
+
   if (currentView === "dev") {
     return (
       <section id="about" className="py-16 flex items-start gap-8">
@@ -95,7 +143,7 @@ export function About({ currentView }: AboutProps) {
   }
 
   return (
-    <section id="about" className="py-16 sm:py-24 px-2 sm:px-6">
+    <section id="about" ref={(el) => (sectionRef.current = el)} className="py-16 sm:py-24 px-2 sm:px-6">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-10 sm:mb-16">
           <h2 className="text-3xl font-bold mb-4">About CreativeMind Technology</h2>
@@ -107,8 +155,8 @@ export function About({ currentView }: AboutProps) {
             {stats.map((s, i) => (
               <Card key={i} className="text-center">
                 <CardContent>
-                  <div className="text-2xl font-bold">{s.value}</div>
-                  <div className="text-sm text-muted-foreground">{s.label}</div>
+                  <AnimatedCounter target={s.value as number} suffix={s.suffix} duration={2000} start={visible} />
+                  <div className="text-sm text-muted-foreground mt-1">{s.label}</div>
                 </CardContent>
               </Card>
             ))}
@@ -117,4 +165,30 @@ export function About({ currentView }: AboutProps) {
       </div>
     </section>
   );
+}
+
+// observe visibility after the component mounts so we don't create observer during SSR
+function useVisibility(ref: React.RefObject<HTMLElement | null>, rootMargin = "-10% 0px -10% 0px") {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            obs.disconnect(); // we only need to start once
+            break;
+          }
+        }
+      },
+      { root: null, rootMargin }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [ref, rootMargin]);
+
+  return isVisible;
 }

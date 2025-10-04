@@ -9,18 +9,83 @@ export function FakeTerminal({ open, onClose }: { open: boolean; onClose: () => 
 
   try { window.dispatchEvent(new CustomEvent('terminal-open')); } catch (e) {}
 
+  const availableCommands = {
+    help: 'Show this help text',
+    clear: 'Clear the terminal output',
+    close: 'Close the terminal',
+    'download-cv': 'Download CV (saves cv.pdf)',
+    'open-projects': 'Open Projects section',
+    contact: 'Scroll to contact section',
+    theme: 'Toggle theme: theme <light|dark>',
+    echo: 'Echo text back',
+    ping: 'Ping the server',
+    'list-projects': 'List project titles',
+    time: 'Show current time',
+    github: 'Open GitHub profile',
+  } as Record<string, string>;
+
   const run = (cmd: string) => {
     const trimmed = cmd.trim();
     if (!trimmed) return;
     setLines((l) => [...l, `> ${trimmed}`]);
-    if (trimmed === 'help') {
-      setLines((l) => [...l, 'Commands: help, echo <text>, clear']);
-    } else if (trimmed.startsWith('echo ')) {
-      setLines((l) => [...l, trimmed.slice(5)]);
-    } else if (trimmed === 'clear') {
-      setLines([]);
-    } else {
-      setLines((l) => [...l, `Unknown command: ${trimmed}`]);
+    const [base, ...rest] = trimmed.split(' ');
+    const restStr = rest.join(' ');
+
+    switch (base) {
+      case 'help':
+        setLines((l) => [...l, 'Available commands:']);
+        Object.entries(availableCommands).forEach(([k, v]) => setLines((l) => [...l, `${k.padEnd(15)} - ${v}`]));
+        break;
+      case 'clear':
+        setLines([]);
+        break;
+      case 'close':
+        onClose();
+        break;
+      case 'echo':
+        setLines((l) => [...l, restStr]);
+        break;
+      case 'download-cv':
+        try {
+          const a = document.createElement('a');
+          a.href = '/cv.pdf';
+          a.download = 'cv.pdf';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setLines((l) => [...l, 'CV download started...']);
+        } catch (e) { setLines((l) => [...l, 'Failed to start download']); }
+        break;
+      case 'open-projects':
+        try { document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' }); setLines((l) => [...l, 'Opening Projects...']); } catch (e) { setLines((l) => [...l, 'Failed to open projects']); }
+        break;
+      case 'contact':
+        try { document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); setLines((l) => [...l, 'Opening Contact...']); } catch (e) { setLines((l) => [...l, 'Failed to open contact']); }
+        break;
+      case 'theme':
+        if (rest[0] === 'dark' || rest[0] === 'light') {
+          try { localStorage.setItem('theme', rest[0]); document.body.className = rest[0] === 'dark' ? 'dark' : 'client-view'; setLines((l) => [...l, `Theme set to ${rest[0]}`]); } catch (e) { setLines((l) => [...l, 'Failed to set theme']); }
+        } else {
+          setLines((l) => [...l, 'Usage: theme <light|dark>']);
+        }
+        break;
+      case 'ping':
+        setLines((l) => [...l, 'PONG']);
+        break;
+      case 'list-projects':
+        try {
+          const titles = ['Agent Pilgrims', 'CBT System', 'Lesson Planner'];
+          setLines((l) => [...l, ...titles.map((t) => `- ${t}`)]);
+        } catch (e) { setLines((l) => [...l, 'No projects found']); }
+        break;
+      case 'time':
+        setLines((l) => [...l, new Date().toString()]);
+        break;
+      case 'github':
+        try { window.open('https://github.com/creativemindtech', '_blank'); setLines((l) => [...l, 'Opening GitHub...']); } catch (e) { setLines((l) => [...l, 'Failed to open GitHub']); }
+        break;
+      default:
+        setLines((l) => [...l, `Unknown command: ${trimmed}`]);
     }
   };
 

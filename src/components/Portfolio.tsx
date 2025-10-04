@@ -9,6 +9,7 @@ import { About } from "./About";
 import { Projects } from "./Projects";
 import { Skills } from "./Skills";
 import { Contact } from "./Contact";
+import Videos from './Videos';
 import { cn } from "@/lib/utils";
 
 export function Portfolio() {
@@ -33,6 +34,11 @@ export function Portfolio() {
       <Hero currentView={currentView} />
       <About currentView={currentView} />
       <Projects currentView={currentView} />
+      {/* Videos section (YouTube embeds) */}
+      {/* Lazy-load the Videos component to avoid bundle cost if desired */}
+      <div id="videos-section">
+        <Videos currentView={currentView} />
+      </div>
       <Skills currentView={currentView} />
       <Contact currentView={currentView} />
     </div>

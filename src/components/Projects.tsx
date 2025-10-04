@@ -5,6 +5,7 @@ import TikTokIcon from "@/components/icons/TikTokIcon";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +19,7 @@ import cbtImg from "@/assets/cbt.jpg";
 import lessonpImg from "@/assets/lessonp.jpg";
 import pilgrimImg from "@/assets/pilgrim.jpg";
 import profilePhoto from "@/assets/profile-photo.jpg";
+import { Skills } from "./Skills";
 import { Hero } from "./Hero";
 import { Contact } from "./Contact";
 import ChatBox from "@/components/ChatBox";
@@ -348,17 +350,63 @@ export function Projects({ currentView }: ProjectsProps) {
         </div>
 
         <Dialog open={skillsModalOpen} onOpenChange={setSkillsModalOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Skills & Technologies</DialogTitle>
-              <DialogDescription>Skillset used across projects.</DialogDescription>
-            </DialogHeader>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {["HTML","CSS","JS","TS","React","Node","Express","MongoDB"].map((s) => <Badge key={s}>{s}</Badge>)}
+          <DialogContent className="max-w-5xl w-[90vw]">
+            {/* Compact skills modal for Dev View: two-column grid with progress bars */}
+            <div className="p-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <DialogHeader>
+                    <DialogTitle>Skills & Technologies</DialogTitle>
+                    <DialogDescription>A compact view of skill proficiencies.</DialogDescription>
+                  </DialogHeader>
+                </div>
+                <div className="text-sm text-muted-foreground">Experience: 5+ years</div>
+              </div>
+
+              {/* Define categories compactly (kept small to avoid duplicating a large dataset) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                <div>
+                  <h4 className="font-semibold mb-3">Frontend</h4>
+                  {[
+                    { name: 'React', level: 95 },
+                    { name: 'TypeScript', level: 90 },
+                    { name: 'Next.js', level: 85 },
+                    { name: 'Tailwind CSS', level: 90 }
+                  ].map((s) => (
+                    <div key={s.name} className="mb-3">
+                      <div className="flex justify-between mb-1 text-sm"><span>{s.name}</span><span className="text-muted-foreground">{s.level}%</span></div>
+                      <Progress value={s.level} className="h-2" />
+                    </div>
+                  ))}
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-3">Backend & Tools</h4>
+                  {[
+                    { name: 'Node.js', level: 90 },
+                    { name: 'Python', level: 85 },
+                    { name: 'Docker', level: 80 },
+                    { name: 'AWS', level: 75 }
+                  ].map((s) => (
+                    <div key={s.name} className="mb-3">
+                      <div className="flex justify-between mb-1 text-sm"><span>{s.name}</span><span className="text-muted-foreground">{s.level}%</span></div>
+                      <Progress value={s.level} className="h-2" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <h4 className="font-semibold mb-2">Technologies</h4>
+                <div className="flex flex-wrap gap-2">
+                  {['React','TypeScript','Node.js','Python','Tailwind CSS','Docker','AWS','PostgreSQL','MongoDB'].map(t => <Badge key={t}>{t}</Badge>)}
+                </div>
+              </div>
+
+              <DialogFooter className="mt-6">
+                <DialogClose />
+              </DialogFooter>
             </div>
-            <DialogFooter>
-              <DialogClose />
-            </DialogFooter>
           </DialogContent>
         </Dialog>
       </section>

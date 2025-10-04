@@ -13,7 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import CommandPalette from './CommandPalette';
 import FakeTerminal from './FakeTerminal';
-import ChatToggleWidget from '@/components/ChatToggleWidget';
+// ChatToggleWidget is provided globally by the top-level layout (Portfolio)
 
 interface VSCodeLayoutProps {
   children: React.ReactNode;
@@ -233,8 +233,7 @@ export function VSCodeLayout({ children, className }: VSCodeLayoutProps) {
           <span>Ln 1, Col 1</span>
         </div>
       </div>
-      {/* Site-wide Chat Toggle */}
-      <ChatToggleWidget />
+      {/* Site-wide Chat Toggle is provided by the top-level Portfolio component */}
     </div>
   );
 }
