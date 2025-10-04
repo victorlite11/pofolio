@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: pofolio-frontend
+    env: static
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: dist
+    branch: main
+    # Note: set the build and publish settings in Render dashboard if you prefer the UI
+
+  - type: web
+    name: pofolio-server
+    env: node
+    plan: free
+    branch: main
+    buildCommand: "npm install"
+    startCommand: "node server/index.js"
+    buildContext: server
+    envVars:
+      - key: PORT
+        value: "4000"
+      - key: SMTP_HOST
+        fromDatabase: false
+      - key: SMTP_PORT
+        fromDatabase: false
+      - key: SMTP_SECURE
+        fromDatabase: false
+      - key: SMTP_USER
+        fromDatabase: false
+      - key: SMTP_PASS
+        fromDatabase: false
+      - key: SMTP_FROM
+        fromDatabase: false
+      - key: CONTACT_RECEIVER
+        fromDatabase: false
+
+# You will need to set the SMTP_* env vars in the Render dashboard for the server service securely.
