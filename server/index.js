@@ -169,5 +169,23 @@ app.post('/api/contact', (req, res) => {
   });
 });
 
+// Health check endpoint for Render and monitoring
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true, time: new Date().toISOString() });
+});
+
+// If a frontend build exists at ../dist, serve it as static files so the same service can host both
+const distPath = path.join(process.cwd(), '..', 'dist');
+if (fs.existsSync(distPath)) {
+  console.log('Serving static frontend from', distPath);
+  app.use(express.static(distPath));
+  // Fallback to index.html for SPA routing
+  app.get('*', (req, res, next) => {
+    // Only handle GET requests that are not API routes
+    if (req.method !== 'GET' || req.path.startsWith('/api/')) return next();
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
+
 const port = process.env.PORT || 4000;
 app.listen(port, () => console.log(`Contact server running on http://localhost:${port}`));
