@@ -6,7 +6,7 @@ services:
     branch: main
     # Build script will build the frontend and install server deps
     buildCommand: "bash ./render-build.sh"
-    startCommand: "node server/index.js"
+  startCommand: "node index.cjs"
     # Root stays at repo root; render-build.sh will handle building the frontend into ./dist
     envVars:
       - key: PORT
