@@ -19,7 +19,7 @@ function createTransport(options) {
 }
 
 // Build primary transporter from env with configurable timeouts
-const SMTP_TIMEOUT_MS = Number(process.env.SMTP_TIMEOUT_MS || 60000); // default 60s
+const SMTP_TIMEOUT_MS = Number(process.env.SMTP_TIMEOUT_MS || 120000); // default 120s for Render
 function buildSmtpOptions(override = {}) {
   return {
     host: process.env.SMTP_HOST,
@@ -66,7 +66,7 @@ async function verifyWithFallback() {
   const primaryOk = await attemptVerify(buildSmtpOptions(), 'primary');
   if (primaryOk) return;
 
-  console.log('Primary transporter verify failed. Attempting fallback to port 587 (STARTTLS)...');
+  console.log('Primary transporter verify failed. Attempting fallback to port 587 (STARTTLS)... (fallback to 587 is automatic)');
   const fallbackOpts = buildSmtpOptions({ port: 587, secure: false });
   const fallbackOk = await attemptVerify(fallbackOpts, 'fallback 587');
   if (!fallbackOk) {
