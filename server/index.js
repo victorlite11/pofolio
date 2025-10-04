@@ -28,6 +28,8 @@ function buildSmtpOptions(override = {}) {
     port: Number(process.env.SMTP_PORT || 587),
     // If SMTP_SECURE is explicitly set to 'true' we'll use SMTPS (465); otherwise prefer STARTTLS
     secure: process.env.SMTP_SECURE === 'true',
+    // Force IPv4 where possible — some cloud hosts have flaky IPv6 routing
+    family: 4,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
@@ -76,8 +78,8 @@ async function verifyWithFallback() {
   const primaryOk = await attemptVerify(buildSmtpOptions(), 'primary');
   if (primaryOk) return;
 
-  console.log('Primary transporter verify failed. Attempting fallback to port 465 (SMTPS)...');
-  const fallbackOpts = buildSmtpOptions({ port: 465, secure: true });
+  console.log('Primary transporter verify failed. Attempting fallback to port 465 (SMTPS) with IPv4-only...');
+  const fallbackOpts = buildSmtpOptions({ port: 465, secure: true, family: 4 });
   const fallbackOk = await attemptVerify(fallbackOpts, 'fallback 465');
   if (!fallbackOk) {
     console.error('Both primary and fallback transporter.verify failed: see earlier logs for details');
