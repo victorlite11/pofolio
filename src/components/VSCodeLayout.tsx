@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import CommandPalette from './CommandPalette';
 import FakeTerminal from './FakeTerminal';
+import JarvisPanel from './JarvisPanel';
 // ChatToggleWidget is provided globally by the top-level layout (Portfolio)
 
 interface VSCodeLayoutProps {
@@ -154,6 +155,7 @@ export function VSCodeLayout({ children, className }: VSCodeLayoutProps) {
                 );
               })}
             </div>
+            <JarvisPanel />
           </div>
         </div>
       )}
