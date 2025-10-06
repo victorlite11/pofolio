@@ -187,7 +187,7 @@ export default function JarvisPanel({ videoSrc = DEFAULT_VIDEO_SRC }: { videoSrc
     (async () => {
       await playIntroSongOnce();
       await playIntroTone();
-      speak('Jarvis online. I am ready. Say a command or press the microphone.');
+      speak('Jarvic online. I am ready. Say a command or press the microphone.');
     })();
   }, []);
 
@@ -207,8 +207,8 @@ export default function JarvisPanel({ videoSrc = DEFAULT_VIDEO_SRC }: { videoSrc
   r.onresult = (evt: any) => {
       try {
         const transcriptRaw = evt?.results?.[0]?.[0]?.transcript;
-        const text = (transcriptRaw || '').trim();
-        console.log('Jarvis heard:', text);
+  const text = (transcriptRaw || '').trim();
+  console.log('Jarvic heard:', text);
         if (text) {
           // show on-screen transcript for debugging / UX
           try { setTranscript(text); } catch (e) {}
@@ -247,7 +247,8 @@ export default function JarvisPanel({ videoSrc = DEFAULT_VIDEO_SRC }: { videoSrc
     text = (text || '').toLowerCase();
     console.log('handleCommand received:', text);
     // strip leading wake words like "jarvis" or "hey jarvis"
-    text = text.replace(/^\s*(hey\s+)?jarvis\s+/i, '').trim();
+  // accept Jarvic as wake word too
+  text = text.replace(/^\s*(hey\s+)?(jarvis|jarvic)\s+/i, '').trim();
     // structured commands
     if (text.includes('open') && text.includes('projects')) {
       // ensure Dev View is active, then open the section
@@ -358,7 +359,7 @@ export default function JarvisPanel({ videoSrc = DEFAULT_VIDEO_SRC }: { videoSrc
   return (
     <>
       <div className="mt-4 p-2 border-t border-vscode-border">
-      <div className="text-xs text-vscode-text-dim mb-2">Jarvis</div>
+  <div className="text-xs text-vscode-text-dim mb-2">Jarvic</div>
       <div className="flex items-center justify-center">
         <div className="relative">
           <div className={`rounded-full overflow-hidden w-56 h-56 bg-black ring-4 ring-vscode-accent/40 shadow-md relative ${speaking ? 'animate-pulse-slow ring-vscode-accent/70' : ''}`}>
@@ -434,7 +435,7 @@ export default function JarvisPanel({ videoSrc = DEFAULT_VIDEO_SRC }: { videoSrc
                   }
                 }}
                 className="absolute inset-0 flex items-center justify-center bg-black/30 text-white text-2xl"
-                aria-label="Play Jarvis"
+                aria-label="Play Jarvic"
               >
                 ▶
               </button>
@@ -485,7 +486,7 @@ export default function JarvisPanel({ videoSrc = DEFAULT_VIDEO_SRC }: { videoSrc
             </button>
 
             <button
-              onClick={() => { speak('Jarvis reset.'); try { videoRef.current?.pause(); if (videoRef.current) { videoRef.current.currentTime = 0; videoRef.current.muted = true; } setAudioMuted(true); } catch(e){} }}
+              onClick={() => { speak('Jarvic reset.'); try { videoRef.current?.pause(); if (videoRef.current) { videoRef.current.currentTime = 0; videoRef.current.muted = true; } setAudioMuted(true); } catch(e){} }}
               title="Reset"
               className="w-9 h-9 flex items-center justify-center rounded-full shadow-md bg-vscode-bg-lighter text-vscode-text"
             >

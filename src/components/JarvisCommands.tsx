@@ -13,12 +13,12 @@ const commands: Array<{ cmd: string; hint: string }> = [
   { cmd: 'Take me back to client view', hint: 'Switches to client/public view' },
   { cmd: 'Open chatbot', hint: 'Opens the chatbot panel' },
   { cmd: 'Open contact form', hint: 'Opens the contact form' },
-  { cmd: 'Play', hint: 'Plays Jarvis video or audio' },
+  { cmd: 'Play', hint: 'Plays Jarvic video or audio' },
   { cmd: 'Pause', hint: 'Pauses playback' },
   { cmd: 'Unmute', hint: 'Enables original audio' },
   { cmd: 'Mute', hint: 'Mutes audio' },
-  { cmd: 'What time is it', hint: 'Jarvis will speak the current time' },
-  { cmd: 'Reset', hint: 'Resets Jarvis playback to start' },
+  { cmd: 'What time is it', hint: 'Jarvic will speak the current time' },
+  { cmd: 'Reset', hint: 'Resets Jarvic playback to start' },
   { cmd: 'Help', hint: 'Show this list' },
 ];
 
@@ -29,7 +29,7 @@ export default function JarvisCommands({ open, onClose, onExecute }: Props) {
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="relative w-96 max-w-full bg-white dark:bg-[#0e1012] rounded-md shadow-lg p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold">Jarvis — Voice Commands</h3>
+          <h3 className="text-sm font-semibold">Jarvic — Voice Commands</h3>
           <button onClick={onClose} className="text-xs px-2 py-1 rounded bg-vscode-bg-lighter">Close</button>
         </div>
 
