@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-// NOTE: adjust this path if your asset filename is different
+// NOTE: this should match the built asset in dist/assets/jarvis.mp4
 const DEFAULT_VIDEO_SRC = '/assets/jarvis.mp4';
 
 export default function JarvisPanel({ videoSrc = DEFAULT_VIDEO_SRC }: { videoSrc?: string }) {
@@ -47,13 +47,14 @@ export default function JarvisPanel({ videoSrc = DEFAULT_VIDEO_SRC }: { videoSrc
   };
 
   useEffect(() => {
-    // autoplay muted when mounted so browsers allow autoplay
+    // autoplay muted visual only when mounted so browsers allow autoplay
     const v = videoRef.current;
     if (v) {
+      // keep the video muted by default so we use speechSynthesis for audio
       v.muted = true;
       v.play().catch(() => {});
     }
-    // small greeting
+    // greeting sequence: intro tone then speech
     (async () => {
       await playIntroTone();
       speak('Jarvis online. I am ready. Say a command or press the microphone.');
@@ -84,7 +85,9 @@ export default function JarvisPanel({ videoSrc = DEFAULT_VIDEO_SRC }: { videoSrc
   };
 
   const handleCommand = (text: string) => {
-    // simple set of commands
+    // normalize
+    text = (text || '').toLowerCase();
+    // structured commands
     if (text.includes('open') && text.includes('projects')) {
       window.dispatchEvent(new CustomEvent('devview-open-section', { detail: { key: 'projects' } }));
       speak('Opening projects.');
@@ -95,6 +98,11 @@ export default function JarvisPanel({ videoSrc = DEFAULT_VIDEO_SRC }: { videoSrc
       speak('Opening about section.');
       return;
     }
+    if (text.includes('open') && text.includes('hero')) {
+      window.dispatchEvent(new CustomEvent('devview-open-section', { detail: { key: 'hero' } }));
+      speak('Opening hero.');
+      return;
+    }
     if (text.includes('play') || text.includes('start')) {
       try { videoRef.current?.play(); speak('Playing.'); } catch (e) {}
       return;
@@ -103,13 +111,26 @@ export default function JarvisPanel({ videoSrc = DEFAULT_VIDEO_SRC }: { videoSrc
       try { videoRef.current?.pause(); speak('Paused.'); } catch (e) {}
       return;
     }
+    if (text.includes('original audio') || text.includes('unmute')) {
+      // emit event to UI and unmute video if allowed
+      try { if (videoRef.current) { videoRef.current.muted = false; speak('Original audio enabled.'); } }
+      catch (e) {}
+      return;
+    }
+    if (text.includes('mute') || text.includes('silence')) {
+      try { if (videoRef.current) { videoRef.current.muted = true; speak('Original audio muted.'); } }
+      catch (e) {}
+      return;
+    }
     if (text.includes('time')) {
       const t = new Date().toLocaleTimeString();
       speak(`The time is ${t}`);
       return;
     }
-    // fallback
-    speak(`I heard: ${text}`);
+
+    // Generic execute: emit a jarvis-exec event with full text for app-level handlers
+    window.dispatchEvent(new CustomEvent('jarvis-exec', { detail: { command: text } }));
+    speak(`Executing command: ${text}`);
   };
 
   const toggleListen = () => {
@@ -146,7 +167,7 @@ export default function JarvisPanel({ videoSrc = DEFAULT_VIDEO_SRC }: { videoSrc
               onClick={() => {
                 const v = videoRef.current;
                 if (v) {
-                  if (v.paused) { v.muted = false; v.play().catch(()=>{}); speak('Playing now.'); }
+                  if (v.paused) { v.play().catch(()=>{}); speak('Playing now.'); }
                   else { v.pause(); speak('Paused.'); }
                 }
               }}
@@ -158,7 +179,8 @@ export default function JarvisPanel({ videoSrc = DEFAULT_VIDEO_SRC }: { videoSrc
             <button onClick={toggleListen} title="Voice Command" className={`text-xs px-2 py-1 rounded ${listening ? 'bg-vscode-error text-white' : 'bg-vscode-bg-lighter'}`}>
               {listening ? 'Listening...' : 'Voice'}
             </button>
-            <button onClick={() => { speak('Jarvis reset.'); try { videoRef.current?.pause(); videoRef.current!.currentTime = 0; } catch(e){} }} title="Reset" className="text-xs px-2 py-1 rounded bg-vscode-bg-lighter">Reset</button>
+            <button onClick={() => { speak('Jarvis reset.'); try { videoRef.current?.pause(); videoRef.current!.currentTime = 0; videoRef.current!.muted = true; } catch(e){} }} title="Reset" className="text-xs px-2 py-1 rounded bg-vscode-bg-lighter">Reset</button>
+            <button onClick={() => { const v=videoRef.current; if (v) { v.muted = !v.muted; speak(v.muted ? 'Original audio muted' : 'Original audio enabled'); } }} title="Toggle Original Audio" className="text-xs px-2 py-1 rounded bg-vscode-bg-lighter">Toggle Audio</button>
           </div>
         </div>
       </div>
