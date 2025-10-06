@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import CommandPalette from './CommandPalette';
 import FakeTerminal from './FakeTerminal';
 import JarvisPanel from './JarvisPanel';
+import { useIsMobile } from '@/hooks/use-mobile';
 // ChatToggleWidget is provided globally by the top-level layout (Portfolio)
 
 interface VSCodeLayoutProps {
@@ -22,6 +23,8 @@ interface VSCodeLayoutProps {
 }
 
 export function VSCodeLayout({ children, className }: VSCodeLayoutProps) {
+  const isMobile = useIsMobile();
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('portfolio.tsx');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeFile, setActiveFile] = useState('portfolio.tsx');
@@ -74,9 +77,17 @@ export function VSCodeLayout({ children, className }: VSCodeLayoutProps) {
   }, []);
 
   return (
-    <div className={cn("flex h-screen bg-vscode-bg text-vscode-text font-code", className)}>
+    <div className={cn((isMobile ? 'flex-col' : 'flex') + ' h-screen bg-vscode-bg text-vscode-text font-code', className)}>
       {/* Activity Bar */}
       <div className="w-12 bg-vscode-sidebar border-r border-vscode-border flex flex-col items-center py-4 space-y-4">
+        {/* Mobile: show a small menu button at top to open the sidebar drawer */}
+        {isMobile && (
+          <button onClick={() => setMobileSidebarOpen(true)} className="mb-2 p-1 rounded focus:outline-none bg-vscode-bg-lighter">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+              <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z" />
+            </svg>
+          </button>
+        )}
         <button onClick={() => setActiveIcon('explorer')} className={`focus:outline-none ${activeIcon==='explorer'?'bg-vscode-bg-lighter':''} rounded p-1 group`}>
           <File className={`w-6 h-6 ${activeIcon==='explorer'?'text-vscode-accent':'text-vscode-text-dim group-hover:text-vscode-text'}`} />
         </button>
@@ -95,9 +106,9 @@ export function VSCodeLayout({ children, className }: VSCodeLayoutProps) {
         </button>
       </div>
 
-      {/* Sidebar */}
+      {/* Sidebar (desktop) */}
       {!sidebarCollapsed && (
-        <div className="w-64 bg-vscode-bg-light border-r border-vscode-border">
+        <div className="hidden md:block w-64 bg-vscode-bg-light border-r border-vscode-border">
           <div className="p-4">
             <h3 className="text-sm font-semibold text-vscode-text mb-4">EXPLORER</h3>
             <div className="space-y-1">
@@ -156,6 +167,78 @@ export function VSCodeLayout({ children, className }: VSCodeLayoutProps) {
               })}
             </div>
             <JarvisPanel />
+          </div>
+        </div>
+      )}
+
+      {/* Mobile sidebar drawer */}
+      {isMobile && mobileSidebarOpen && (
+        <div className="fixed inset-0 z-40 flex">
+          <div className="fixed inset-0 bg-black/40" onClick={() => setMobileSidebarOpen(false)} />
+          <div className="relative w-full max-w-xs bg-vscode-bg-light border-r border-vscode-border p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-vscode-text">EXPLORER</h3>
+              <button onClick={() => setMobileSidebarOpen(false)} className="text-xs px-2 py-1 rounded bg-vscode-bg-lighter">Close</button>
+            </div>
+            <div className="space-y-1 overflow-auto">
+              {files.map((file, index) => {
+                const isActive = activeFile === file.name;
+                const scrollMap: Record<string, string> = {
+                  'Hero.tsx': 'hero',
+                  'About.tsx': 'about',
+                  'Projects.tsx': 'projects',
+                  'portfolio.tsx': '',
+                  'package.json': '',
+                  'README.md': '',
+                };
+                const handleClick = () => {
+                  if (file.type === 'folder') {
+                    if (file.name === 'src') setSrcExpanded((prev) => !prev);
+                    if (file.name === 'components') setComponentsExpanded((prev) => !prev);
+                  } else {
+                    setActiveFile(file.name);
+                    setActiveTab(file.name);
+                    if (!openTabs.includes(file.name)) {
+                      setOpenTabs([...openTabs, file.name]);
+                    }
+                    if (scrollMap[file.name]) {
+                      const el = document.getElementById(scrollMap[file.name]);
+                      if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }
+                    setMobileSidebarOpen(false);
+                  }
+                };
+                return (
+                  <div
+                    key={index}
+                    className={cn(
+                      "flex items-center py-1 px-2 text-sm cursor-pointer hover:bg-vscode-bg-lighter rounded transition-colors",
+                      isActive && file.type === 'file' && "bg-vscode-bg-lighter"
+                    )}
+                    style={{ paddingLeft: `${8 + (file.indent || 0) * 16}px` }}
+                    onClick={handleClick}
+                  >
+                    {file.type === 'folder' ? (
+                      file.expanded ? (
+                        <FolderOpen className="w-4 h-4 mr-2 text-vscode-warning" />
+                      ) : (
+                        <Folder className="w-4 h-4 mr-2 text-vscode-warning" />
+                      )
+                    ) : (
+                      <File className="w-4 h-4 mr-2 text-vscode-accent" />
+                    )}
+                    <span className={isActive && file.type === 'file' ? "text-vscode-text" : "text-vscode-text-dim"}>
+                      {file.name}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-4">
+              <JarvisPanel />
+            </div>
           </div>
         </div>
       )}

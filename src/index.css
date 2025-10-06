@@ -162,6 +162,16 @@
     50% { box-shadow: 0 0 30px hsl(var(--primary-glow) / 0.6); }
   }
 
+  @keyframes pulse-slow {
+    0% { box-shadow: 0 0 0px rgba(0,0,0,0); }
+    50% { box-shadow: 0 0 22px rgba(99,102,241,0.18); transform: scale(1.01); }
+    100% { box-shadow: 0 0 0px rgba(0,0,0,0); }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 1.6s ease-in-out infinite;
+  }
+
   .animate-float {
     animation: float 3s ease-in-out infinite;
   }

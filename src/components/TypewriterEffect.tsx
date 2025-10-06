@@ -11,7 +11,7 @@ interface TypewriterEffectProps {
   onLineComplete?: (lineNumber: number) => void;
 }
 
-export function TypewriterEffect({ lines, speed = 50, className = "", onLineComplete }: TypewriterEffectProps) {
+export function TypewriterEffect({ lines = [], speed = 50, className = "", onLineComplete }: TypewriterEffectProps) {
   const [displayedLines, setDisplayedLines] = useState<Array<{ lineNumber: number; content: string; isComplete: boolean }>>([]);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [currentCharIndex, setCurrentCharIndex] = useState(0);
