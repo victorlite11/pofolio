@@ -204,7 +204,7 @@ export default function JarvisPanel({ videoSrc = DEFAULT_VIDEO_SRC }: { videoSrc
     r.onstart = () => {
       console.log('SpeechRecognition started');
     };
-    r.onresult = (evt: any) => {
+  r.onresult = (evt: any) => {
       try {
         const transcriptRaw = evt?.results?.[0]?.[0]?.transcript;
         const text = (transcriptRaw || '').trim();
@@ -250,35 +250,35 @@ export default function JarvisPanel({ videoSrc = DEFAULT_VIDEO_SRC }: { videoSrc
     text = text.replace(/^\s*(hey\s+)?jarvis\s+/i, '').trim();
     // structured commands
     if (text.includes('open') && text.includes('projects')) {
-      window.dispatchEvent(new CustomEvent('devview-open-section', { detail: { key: 'projects' } }));
+      // ensure Dev View is active, then open the section
+      try { window.dispatchEvent(new CustomEvent('ensure-dev-view')); } catch (e) {}
+      setTimeout(() => { try { window.dispatchEvent(new CustomEvent('devview-open-section', { detail: { key: 'projects' } })); } catch (e) {} }, 150);
       speak('Opening projects.');
       return;
     }
     if (text.includes('open') && text.includes('about')) {
-      window.dispatchEvent(new CustomEvent('devview-open-section', { detail: { key: 'about' } }));
+      try { window.dispatchEvent(new CustomEvent('ensure-dev-view')); } catch (e) {}
+      setTimeout(() => { try { window.dispatchEvent(new CustomEvent('devview-open-section', { detail: { key: 'about' } })); } catch (e) {} }, 150);
       speak('Opening about section.');
       return;
     }
     if (text.includes('open') && text.includes('hero')) {
-      window.dispatchEvent(new CustomEvent('devview-open-section', { detail: { key: 'hero' } }));
+      try { window.dispatchEvent(new CustomEvent('ensure-dev-view')); } catch (e) {}
+      setTimeout(() => { try { window.dispatchEvent(new CustomEvent('devview-open-section', { detail: { key: 'hero' } })); } catch (e) {} }, 150);
       speak('Opening hero.');
       return;
     }
     // open chat / chatbot / ai chat
     if (text.includes('chat') || text.includes('chatbot') || text.includes('ai chat')) {
-      try {
-        console.log('Dispatching devview-open-section -> chat');
-        window.dispatchEvent(new CustomEvent('devview-open-section', { detail: { key: 'chat' } }));
-      } catch (e) {}
+      try { window.dispatchEvent(new CustomEvent('ensure-dev-view')); } catch (e) {}
+      setTimeout(() => { try { console.log('Dispatching devview-open-section -> chat'); window.dispatchEvent(new CustomEvent('devview-open-section', { detail: { key: 'chat' } })); } catch (e) {} }, 150);
       speak('Opening chat.');
       return;
     }
     // open contact
     if (text.includes('contact') || text.includes('contact form')) {
-      try {
-        console.log('Dispatching devview-open-section -> contact');
-        window.dispatchEvent(new CustomEvent('devview-open-section', { detail: { key: 'contact' } }));
-      } catch (e) {}
+      try { window.dispatchEvent(new CustomEvent('ensure-dev-view')); } catch (e) {}
+      setTimeout(() => { try { console.log('Dispatching devview-open-section -> contact'); window.dispatchEvent(new CustomEvent('devview-open-section', { detail: { key: 'contact' } })); } catch (e) {} }, 150);
       speak('Opening contact form.');
       return;
     }

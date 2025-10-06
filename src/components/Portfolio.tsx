@@ -25,6 +25,13 @@ export function Portfolio() {
     document.body.className = currentView === 'dev' ? 'dev-view' : theme === 'dark' ? 'dark' : 'client-view';
   }, [currentView, theme]);
 
+  // allow external UI (Jarvic) to request switching into dev view before opening sections
+  useEffect(() => {
+    const ensureDev = () => setCurrentView('dev');
+    window.addEventListener('ensure-dev-view', ensureDev as EventListener);
+    return () => window.removeEventListener('ensure-dev-view', ensureDev as EventListener);
+  }, []);
+
   useEffect(() => {
     localStorage.setItem('theme', theme);
   }, [theme]);
