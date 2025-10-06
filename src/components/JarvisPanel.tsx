@@ -157,25 +157,14 @@ export default function JarvisPanel({ videoSrc = DEFAULT_VIDEO_SRC }: { videoSrc
 
   return (
     <div className="mt-4 p-2 border-t border-vscode-border">
-      <div className="text-xs text-vscode-text-dim mb-1">Jarvis</div>
-      <div className="bg-vscode-bg rounded overflow-hidden">
-        <video ref={videoRef} src={videoSrc} className="w-full h-36 object-cover bg-black" playsInline loop muted />
-        <div className="p-2 flex items-center justify-between space-x-2">
-          <div className="flex-1">
-            <button
-              className="text-xs px-2 py-1 rounded bg-vscode-accent text-vscode-bg"
-              onClick={() => {
-                const v = videoRef.current;
-                if (v) {
-                  if (v.paused) { v.play().catch(()=>{}); speak('Playing now.'); }
-                  else { v.pause(); speak('Paused.'); }
-                }
-              }}
-            >
-              Play/Pause
-            </button>
+      <div className="text-xs text-vscode-text-dim mb-2">Jarvis</div>
+      <div className="flex items-center justify-center">
+        <div className="relative">
+          <div className="rounded-full overflow-hidden w-36 h-36 bg-black ring-2 ring-vscode-border">
+            <video ref={videoRef} src={videoSrc} className="w-full h-full object-cover" playsInline loop muted />
           </div>
-          <div className="flex items-center space-x-1">
+          {/* small listening / speaking indicator */}
+          <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
             <button onClick={toggleListen} title="Voice Command" className={`text-xs px-2 py-1 rounded ${listening ? 'bg-vscode-error text-white' : 'bg-vscode-bg-lighter'}`}>
               {listening ? 'Listening...' : 'Voice'}
             </button>
