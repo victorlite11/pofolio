@@ -264,6 +264,24 @@ export default function JarvisPanel({ videoSrc = DEFAULT_VIDEO_SRC }: { videoSrc
       speak('Opening hero.');
       return;
     }
+    // open chat / chatbot / ai chat
+    if (text.includes('chat') || text.includes('chatbot') || text.includes('ai chat')) {
+      try {
+        console.log('Dispatching devview-open-section -> chat');
+        window.dispatchEvent(new CustomEvent('devview-open-section', { detail: { key: 'chat' } }));
+      } catch (e) {}
+      speak('Opening chat.');
+      return;
+    }
+    // open contact
+    if (text.includes('contact') || text.includes('contact form')) {
+      try {
+        console.log('Dispatching devview-open-section -> contact');
+        window.dispatchEvent(new CustomEvent('devview-open-section', { detail: { key: 'contact' } }));
+      } catch (e) {}
+      speak('Opening contact form.');
+      return;
+    }
     if (text.includes('play') || text.includes('start')) {
       try {
         videoRef.current?.play();
